@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>homeloan</title>
+</head>
+<body>
+<div>
+  <label>Required Amount</label>
+  <input placeholder="how much you need">
+</div>
+<br>
+<div>
+  <label>When need</label>
+  <select>
+    <option>Immediately</option>
+    <option>Within 7 Days</option>
+    <option>Within 15 Days</option>
+    <option>Within 30 Days</option>
+  </select>
+</div>
+<br>
+<div>
+  <label>Prefer Bank Type</label>
+  <select>
+  <option>Private</option>
+    <option>Government Bank</option>
+    <option>NBFC's</option>
+    </select>
+</div>
+<br>
+
+<a type="button" href="{% url 'form' %}">Next</a>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMI Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 600px;
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .slider-container {
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .slider-label {
+            font-size: 16px;
+            margin-bottom: 5px;
+            display: block;
+            color: #333;
+        }
+
+        .slider {
+            width: 100%;
+        }
+
+        .output {
+            font-size: 16px;
+            color: #333;
+            margin-top: 5px;
+        }
+
+        .results {
+            margin-top: 20px;
+        }
+
+        .result-card {
+            background: #f9f9f9;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .btn {
+            background: #ff3366;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background: #ff6699;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Calculate Your Home Loan EMI</h1>
+        <p>Get a Home Loan quote immediately</p>
+
+        <!-- Loan Amount -->
+        <div class="slider-container">
+            <label class="slider-label">Loan Amount (₹): <span id="loan_amount_output">5,000,000</span></label>
+            <input id="loan_amount" type="range" min="100000" max="10000000" step="50000" value="5000000" class="slider" oninput="updateLoanAmount(this.value)">
+        </div>
+
+        <!-- Interest Rate -->
+        <div class="slider-container">
+            <label class="slider-label">Interest Rate (%): <span id="interest_rate_output">10</span></label>
+            <input id="interest_rate" type="range" min="1" max="30" step="0.1" value="10" class="slider" oninput="updateInterestRate(this.value)">
+        </div>
+
+        <button id="calculate_btn" class="btn" onclick="calculateEMI()">Calculate</button>
+
+        <div class="results">
+            <div class="result-card">
+                <strong>EMI for 10 Years:</strong> <span id="emi_10_years">66,075</span> ₹
+            </div>
+            <div class="result-card">
+                <strong>EMI for 15 Years:</strong> <span id="emi_15_years">53,730</span> ₹
+            </div>
+            <div class="result-card">
+                <strong>EMI for 20 Years:</strong> <span id="emi_20_years">48,251</span> ₹
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Update Loan Amount Display
+        function updateLoanAmount(value) {
+            document.getElementById("loan_amount_output").innerText = parseInt(value).toLocaleString();
+        }
+
+        // Update Interest Rate Display
+        function updateInterestRate(value) {
+            document.getElementById("interest_rate_output").innerText = value;
+        }
+
+        // EMI Calculation Formula
+        function calculateEMI() {
+            const loanAmount = document.getElementById("loan_amount").value;
+            const interestRate = document.getElementById("interest_rate").value;
+
+            const years = [10, 15, 20]; // Loan tenures
+            years.forEach(year => {
+                const emi = calculateForTenure(loanAmount, interestRate, year);
+                document.getElementById(`emi_${year}_years`).innerText = emi.toLocaleString();
+            });
+        }
+
+        function calculateForTenure(loanAmount, interestRate, tenureYears) {
+            const monthlyRate = interestRate / (12 * 100); // Convert annual rate to monthly
+            const tenureMonths = tenureYears * 12; // Convert years to months
+            const emi = (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, tenureMonths)) /
+                        (Math.pow(1 + monthlyRate, tenureMonths) - 1);
+            return Math.round(emi); // Round off to the nearest integer
+        }
+    </script>
+</body>
+</html>

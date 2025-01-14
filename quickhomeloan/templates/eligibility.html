@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home Loan Eligibility Calculator</title>
+  <!-- Bootstrap CSS -->
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"
+    rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: Arial, sans-serif;
+    }
+    .calculator-card {
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .slider-label {
+      font-weight: bold;
+    }
+    .slider-output {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #ff5722;
+    }
+    .apply-button {
+      background-color: #ff5722;
+      color: #fff;
+      font-weight: bold;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+    .apply-button:hover {
+      background-color: #e64a19;
+    }
+    #eligibility-result {
+      color: #155724;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    #emi-result {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #ff5722;
+    }
+  </style>
+</head>
+<body>
+  <div class="container my-5">
+    <div class="calculator-card">
+      <h1 class="text-center text-primary mb-4">Home Loan Eligibility Calculator</h1>
+
+      <div class="mb-4">
+        <label class="slider-label">Monthly Income (₹):</label>
+        <input type="range" class="form-range" id="monthlyIncomeSlider" min="5000" max="1000000" step="5000">
+        <p>₹<span id="monthlyIncomeOutput">50,000</span></p>
+      </div>
+
+      <div class="mb-4">
+        <label class="slider-label">Other Existing EMIs (₹):</label>
+        <input type="range" class="form-range" id="existingEMIsSlider" min="0" max="1000000" step="5000">
+        <p>₹<span id="existingEMIsOutput">0</span></p>
+      </div>
+
+      <div class="mb-4">
+        <label class="slider-label">Loan Tenure (Years):</label>
+        <input type="range" class="form-range" id="loanTenureSlider" min="3" max="30" step="1">
+        <p><span id="loanTenureOutput">5</span> Years</p>
+      </div>
+
+      <div class="mb-4">
+        <label class="slider-label">Interest Rate (%):</label>
+        <input type="range" class="form-range" id="interestRateSlider" min="7" max="18" step="0.1">
+        <p><span id="interestRateOutput">9</span>%</p>
+      </div>
+
+      <div class="text-center">
+        <p>You are eligible for a total loan amount of:</p>
+        <p id="eligibility-result">₹13,24,768</p>
+        <p>Your EMI will be: <span id="emi-result">₹27,500</span></p>
+        <button class="apply-button">Apply for Home Loan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const monthlyIncomeSlider = document.getElementById('monthlyIncomeSlider');
+    const existingEMIsSlider = document.getElementById('existingEMIsSlider');
+    const loanTenureSlider = document.getElementById('loanTenureSlider');
+    const interestRateSlider = document.getElementById('interestRateSlider');
+
+    const monthlyIncomeOutput = document.getElementById('monthlyIncomeOutput');
+    const existingEMIsOutput = document.getElementById('existingEMIsOutput');
+    const loanTenureOutput = document.getElementById('loanTenureOutput');
+    const interestRateOutput = document.getElementById('interestRateOutput');
+    const eligibilityResult = document.getElementById('eligibility-result');
+    const emiResult = document.getElementById('emi-result');
+
+    function updateResults() {
+      const income = parseFloat(monthlyIncomeSlider.value) || 0;
+      const emis = parseFloat(existingEMIsSlider.value) || 0;
+      const tenure = parseFloat(loanTenureSlider.value) || 0;
+      const rate = parseFloat(interestRateSlider.value) || 0;
+
+      monthlyIncomeOutput.innerText = income.toLocaleString();
+      existingEMIsOutput.innerText = emis.toLocaleString();
+      loanTenureOutput.innerText = tenure;
+      interestRateOutput.innerText = rate.toFixed(1);
+
+      // Calculate loan eligibility
+      const monthlyRate = rate / 1200;
+      const monthlyEMICapacity = income * 0.50 - emis;
+      const maxLoan =
+        (monthlyEMICapacity / monthlyRate) *
+        (1 - Math.pow(1 + monthlyRate, -tenure * 12));
+      const emi = monthlyEMICapacity;
+
+      eligibilityResult.innerText = `₹${Math.max(0, Math.round(maxLoan)).toLocaleString()}`;
+      emiResult.innerText = `₹${Math.max(0, Math.round(emi)).toLocaleString()}`;
+    }
+
+    [monthlyIncomeSlider, existingEMIsSlider, loanTenureSlider, interestRateSlider].forEach(slider => {
+      slider.addEventListener('input', updateResults);
+    });
+
+    // Initialize results on page load
+    updateResults();
+  </script>
+</body>
+</html>

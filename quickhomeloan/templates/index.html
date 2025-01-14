@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Adviser</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        .modal.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <button onclick="openModal()">Apply Home Loan</button>
+    <div class="container mt-5 text-center">
+
+  </div>
+
+    <div id="loanModal" class="modal">
+        <div id="step1">
+            <div>
+                <label>Required Amount</label>
+                <input id="requiredAmount" placeholder="How much you need">
+            </div>
+            <br>
+            <div>
+                <label>When need</label>
+                <select id="needTime">
+                    <option>Immediately</option>
+                    <option>Within 7 Days</option>
+                    <option>Within 15 Days</option>
+                    <option>Within 30 Days</option>
+                </select>
+            </div>
+            <br>
+            <div>
+                <label>Prefer Bank Type</label>
+                <select id="bankType">
+                    <option>Private</option>
+                    <option>Government Bank</option>
+                    <option>NBFC's</option>
+                </select>
+            </div>
+            <br>
+            <button onclick="goToStep2()">Next</button>
+        </div>
+
+        <div id="step2" style="display: none;">
+            <h3>For Best Loan Offers Get in Touch</h3>
+            <div>
+                <label>Name</label>
+                <input id="name" placeholder="Your Full Name">
+            </div>
+            <br>
+            <div>
+                <label>Mobile</label>
+                <input id="mobile" placeholder="Your Mobile Number">
+            </div>
+            <br>
+            <button onclick="submitApplication()">Save</button>
+        </div>
+    </div>
+
+    <script>
+        function openModal() {
+            document.getElementById('loanModal').classList.add('active');
+        }
+
+        function goToStep2() {
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+        }
+
+        function submitApplication() {
+            const requiredAmount = document.getElementById('requiredAmount').value;
+            const needTime = document.getElementById('needTime').value;
+            const bankType = document.getElementById('bankType').value;
+            const name = document.getElementById('name').value;
+            const mobile = document.getElementById('mobile').value;
+
+            $.ajax({
+                url: "{% url 'save_loan_application' %}",
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                },
+                data: JSON.stringify({
+                    required_amount: requiredAmount,
+                    need_time: needTime,
+                    bank_type: bankType,
+                    name: name,
+                    mobile: mobile,
+                }),
+                contentType: "application/json",
+                success: function (response) {
+                    alert(`${response.message} Your token: ${response.token}`);
+                    document.getElementById('loanModal').classList.remove('active');
+                },
+                error: function () {
+                    alert("Something went wrong. Please try again.");
+                }
+            });
+        }
+    </script>
+</body>
+</html>

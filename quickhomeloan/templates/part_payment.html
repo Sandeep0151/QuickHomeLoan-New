@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Part Payment Calculator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <style>
+        .slider-container {
+            margin-bottom: 20px;
+        }
+        .result-box {
+            padding: 20px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Part Payment Calculator</h2>
+    <form id="calculator-form">
+        <!-- Existing sliders for loan details -->
+        <div class="slider-container">
+            <label for="loan_amount">My Outstanding Loan Amount is</label>
+            <input type="range" id="loan_amount" min="100000" max="30000000" step="10000" class="form-range">
+            <input type="text" id="loan_amount_display" class="form-control" readonly>
+        </div>
+        <div class="slider-container">
+            <label for="interest_rate">My Current Interest Rate is</label>
+            <input type="range" id="interest_rate" min="6" max="12" step="0.1" class="form-range">
+            <input type="text" id="interest_rate_display" class="form-control" readonly>
+        </div>
+        <div class="slider-container">
+            <label for="loan_tenure">My Outstanding Loan Tenure is (Years)</label>
+            <input type="range" id="loan_tenure" min="1" max="30" step="1" class="form-range">
+            <input type="text" id="loan_tenure_display" class="form-control" readonly>
+        </div>
+        <div class="slider-container">
+            <label for="pre_payment">Amount You Want to Prepay</label>
+            <input type="range" id="pre_payment" min="10000" max="30000000" step="10000" class="form-range">
+            <input type="text" id="pre_payment_display" class="form-control" readonly>
+        </div>
+
+        <!-- Radio buttons for functionality -->
+        <div class="form-check mt-4">
+            <input type="radio" id="decrease_emi" name="calculation_type" value="decrease_emi" class="form-check-input" checked>
+            <label for="decrease_emi" class="form-check-label">Decrease EMI</label>
+        </div>
+        <div class="form-check">
+            <input type="radio" id="keep_same_emi" name="calculation_type" value="keep_same_emi" class="form-check-input">
+            <label for="keep_same_emi" class="form-check-label">Keep EMI Same & Decrease Loan Tenure</label>
+        </div>
+    </form>
+
+    <!-- Results Section -->
+    <div class="result-box mt-4">
+        <h4>Your Results</h4>
+        <p><strong>Original EMI:</strong> ₹<span id="original_emi">0.00</span></p>
+        <p><strong>Revised EMI:</strong> ₹<span id="revised_emi">0.00</span></p>
+        <p><strong>Reduced Loan Tenure:</strong> <span id="reduced_tenure">N/A</span></p>
+        <p><strong>Total Savings:</strong> ₹<span id="total_savings">0.00</span></p>
+    </div>
+
+    <!-- Additional Details for Loan Tenure Reduction -->
+    <div id="tenure-details" class="mt-4" style="display: none;">
+        <h4>Loan Tenure Reduction Details</h4>
+        <p><strong>Current Tenure:</strong> <span id="current_tenure">N/A</span> months</p>
+        <p><strong>Revised Tenure:</strong> <span id="new_tenure">N/A</span> months</p>
+        <p><strong>Number of Months Early:</strong> <span id="months_early">N/A</span></p>
+    </div>
+</div>
+
+<script>
+ // Function to calculate EMI
+function calculateEMI(principal, rate, tenure) {
+    const monthlyRate = rate / 12 / 100;
+    const months = tenure * 12;
+    return (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) /
+           (Math.pow(1 + monthlyRate, months) - 1);
+}
+
+// Function to calculate reduced loan tenure
+function calculateReducedTenure(principal, rate, emi) {
+    const monthlyRate = rate / 12 / 100;
+    let months = 0;
+    while (principal > 0) {
+        const interest = principal * monthlyRate;
+        const principalPaid = emi - interest;
+        principal -= principalPaid;
+        months++;
+    }
+    return months;
+}
+
+// Update results dynamically
+function updateResults() {
+    const loanAmount = parseFloat(document.getElementById("loan_amount").value);
+    const interestRate = parseFloat(document.getElementById("interest_rate").value);
+    const loanTenure = parseFloat(document.getElementById("loan_tenure").value);
+    const prePayment = parseFloat(document.getElementById("pre_payment").value);
+    const calculationType = document.querySelector("input[name=calculation_type]:checked").value;
+
+    // Original EMI
+    const originalEMI = calculateEMI(loanAmount, interestRate, loanTenure);
+
+    // Update results based on selected calculation type
+    if (calculationType === "decrease_emi") {
+        const newLoanAmount = loanAmount - prePayment;
+        const revisedEMI = calculateEMI(newLoanAmount, interestRate, loanTenure);
+        const totalSavings = (originalEMI - revisedEMI) * loanTenure * 12;
+
+        document.getElementById("original_emi").innerText = originalEMI.toFixed(2);
+        document.getElementById("revised_emi").innerText = revisedEMI.toFixed(2);
+        document.getElementById("total_savings").innerText = totalSavings.toFixed(2);
+        document.getElementById("reduced_tenure").innerText = "N/A";
+
+        // Hide tenure details
+        document.getElementById("tenure-details").style.display = "none";
+    }
+
+    if (calculationType === "keep_same_emi") {
+        const newLoanAmount = loanAmount - prePayment;
+        const reducedTenureMonths = calculateReducedTenure(newLoanAmount, interestRate, originalEMI);
+        const currentTenureMonths = loanTenure * 12;
+        const monthsEarly = currentTenureMonths - reducedTenureMonths;
+
+        document.getElementById("original_emi").innerText = originalEMI.toFixed(2);
+        document.getElementById("revised_emi").innerText = "Same";
+        document.getElementById("reduced_tenure").innerText = reducedTenureMonths + " months";
+
+        // Show tenure details
+        document.getElementById("tenure-details").style.display = "block";
+        document.getElementById("current_tenure").innerText = currentTenureMonths + " months";
+        document.getElementById("new_tenure").innerText = reducedTenureMonths + " months";
+        document.getElementById("months_early").innerText = monthsEarly + " months";
+    }
+}
+
+// Attach event listeners to sliders and radio buttons
+document.querySelectorAll("input[type=range]").forEach((slider) => {
+    slider.addEventListener("input", (event) => {
+        const display = document.getElementById(event.target.id + "_display");
+        display.value = event.target.value;
+        updateResults();
+    });
+});
+
+document.querySelectorAll("input[name=calculation_type]").forEach((radio) => {
+    radio.addEventListener("change", () => updateResults());
+});
+
+// Initialize on page load
+window.addEventListener("load", () => {
+    document.querySelectorAll("input[type=range]").forEach((slider) => {
+        const display = document.getElementById(slider.id + "_display");
+        display.value = slider.value;
+    });
+    updateResults();
+});
+
+</script>
+
+</body>
+</html>
